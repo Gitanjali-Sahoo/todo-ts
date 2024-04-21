@@ -4,13 +4,15 @@ import uuid from 'react-uuid'
 type TodoItem = {
     item: string
     id: string
+    completed: boolean
 }
 
 const TodoLists = () => {
     const [inputValue, setInputValue] = useState<string>('')
     const [lists, setLists] = useState<TodoItem[]>([])
     const [editItemId, setEditItemId] = useState<string | null>(null)
-    const [deletedItem, setDeletedItem] = useState<TodoItem[]>([])
+    const [deletedItems, setDeletedItems] = useState<TodoItem[]>([])
+    // const [checked, setChecked] = useState<boolean>(false)
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(e.target.value)
@@ -23,7 +25,8 @@ const TodoLists = () => {
             const newId = uuid()
             const TodoItem = {
                 id: newId,
-                item: inputValue
+                item: inputValue,
+                completed: false
             }
             setLists([...lists, TodoItem])
             setInputValue('')
@@ -32,13 +35,13 @@ const TodoLists = () => {
 
     const handleDelete = (id: string) => {
         const newLists = lists.filter((list) => list.id !== id)
-        const itemDeleted = lists.find((list) => list.id === id)
+        const itemsDeleted = lists.find((list) => list.id === id)
         setLists(newLists)
         if (editItemId === id) {
             setEditItemId(null)
         }
-        if (itemDeleted) {
-            setDeletedItem([...deletedItem, itemDeleted])
+        if (itemsDeleted) {
+            setDeletedItems([...deletedItems, itemsDeleted])
         }
     }
 
@@ -61,6 +64,14 @@ const TodoLists = () => {
         )
         setLists(updateInputValue)
     }
+
+    const handleCheck = (id: string) => {
+        const updatedItems = lists.map((list) =>
+            list.id === id ? { ...list, completed: !list.completed } : list
+        )
+        setLists(updatedItems)
+    }
+
     return (
         <>
             <div>
@@ -83,7 +94,11 @@ const TodoLists = () => {
                     {lists.map((list) => {
                         return (
                             <ul key={list.id} className="list-container">
-                                <input type="checkbox" name="" id="" />
+                                <input
+                                    type="checkbox"
+                                    onChange={() => handleCheck(list.id)}
+                                />
+
                                 <div>
                                     {editItemId === list.id ? (
                                         <input
@@ -94,7 +109,20 @@ const TodoLists = () => {
                                             }}
                                         />
                                     ) : (
-                                        list.item
+                                        <>
+                                            {list.completed === true ? (
+                                                <div
+                                                    style={{
+                                                        textDecoration:
+                                                            'line-Through'
+                                                    }}
+                                                >
+                                                    {list.item}
+                                                </div>
+                                            ) : (
+                                                list.item
+                                            )}
+                                        </>
                                     )}
                                 </div>
                                 <input
@@ -123,13 +151,16 @@ const TodoLists = () => {
                 </div>
                 <div>
                     <h3>
-                        Completed Items <span>{deletedItem.length}</span>
+                        Completed Items <span>{deletedItems.length}</span>
                     </h3>
                     <div>
                         {' '}
-                        {deletedItem.map((item) => {
+                        {deletedItems.map((item) => {
                             return (
-                                <ul key={item.id}>
+                                <ul
+                                    key={item.id}
+                                    className="deletedItem-container"
+                                >
                                     <input type="checkbox" name="" id="" />
                                     <div>{item.item}</div>
                                 </ul>

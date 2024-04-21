@@ -9,3 +9,9 @@
     align-items: baseline;
     padding: 0;
 }
+.deletedItem-container {
+    display: flex;
+}
+.checkbox-container :hover {
+    background: red;
+}
