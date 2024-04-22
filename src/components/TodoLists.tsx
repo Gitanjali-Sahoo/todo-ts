@@ -11,7 +11,6 @@ const TodoLists = () => {
     const [inputValue, setInputValue] = useState<string>('')
     const [lists, setLists] = useState<TodoItem[]>([])
     const [editItemId, setEditItemId] = useState<string | null>(null)
-    const [deletedItems, setDeletedItems] = useState<TodoItem[]>([])
     const [completedItems, setCompletedItems] = useState<TodoItem[]>([])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,7 +34,6 @@ const TodoLists = () => {
 
     const handleDelete = (id: string) => {
         const newLists = lists.filter((list) => list.id !== id)
-        const itemsDeleted = lists.find((list) => list.id === id)
         setLists(newLists)
         const updateCompltedValue = completedItems.filter(
             (item) => item.id !== id
@@ -44,9 +42,6 @@ const TodoLists = () => {
 
         if (editItemId === id) {
             setEditItemId(null)
-        }
-        if (itemsDeleted) {
-            setDeletedItems([...deletedItems, itemsDeleted])
         }
     }
 
