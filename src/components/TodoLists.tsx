@@ -12,7 +12,7 @@ const TodoLists = () => {
     const [lists, setLists] = useState<TodoItem[]>([])
     const [editItemId, setEditItemId] = useState<string | null>(null)
     const [deletedItems, setDeletedItems] = useState<TodoItem[]>([])
-    // const [checked, setChecked] = useState<boolean>(false)
+    const [completedItems, setCompletedItems] = useState<TodoItem[]>([])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(e.target.value)
@@ -37,6 +37,11 @@ const TodoLists = () => {
         const newLists = lists.filter((list) => list.id !== id)
         const itemsDeleted = lists.find((list) => list.id === id)
         setLists(newLists)
+        const updateCompltedValue = completedItems.filter(
+            (item) => item.id !== id
+        )
+        setCompletedItems(updateCompltedValue)
+
         if (editItemId === id) {
             setEditItemId(null)
         }
@@ -50,9 +55,10 @@ const TodoLists = () => {
     }
     const handleUpdate = (id: string, newValue: string) => {
         const updateList = lists.map((list) =>
-            list.id === id ? { ...list, list: newValue } : list
+            list.id === id ? { ...list, item: newValue } : list
         )
         setLists(updateList)
+
         setEditItemId(null)
     }
     const handleInputValue = (
@@ -60,7 +66,7 @@ const TodoLists = () => {
         id: string
     ) => {
         const updateInputValue = lists.map((list) =>
-            list.id === id ? { ...list, list: e.target.value } : list
+            list.id === id ? { ...list, item: e.target.value } : list
         )
         setLists(updateInputValue)
     }
@@ -69,17 +75,43 @@ const TodoLists = () => {
         const updatedItems = lists.map((list) =>
             list.id === id ? { ...list, completed: !list.completed } : list
         )
-        setLists(updatedItems)
+        const removeCompletedTask = updatedItems.filter(
+            (item) => item.id !== id
+        )
+        setLists(removeCompletedTask)
+
+        const completedTask = updatedItems.find((item) => item.id === id)
+        if (completedTask) {
+            setCompletedItems([...completedItems, completedTask])
+        }
     }
 
+    const handleUncheck = (id: string) => {
+        const uncheckedItemIndex = completedItems.findIndex(
+            (item) => item.id === id
+        )
+
+        if (uncheckedItemIndex !== -1) {
+            const updatedCompletedItems = [...completedItems]
+            const [uncheckedTask] = updatedCompletedItems.splice(
+                uncheckedItemIndex,
+                1
+            )
+
+            uncheckedTask.completed = false
+            setLists([...lists, uncheckedTask])
+            setCompletedItems(updatedCompletedItems)
+        }
+    }
     return (
         <>
             <div>
                 <h1>Todo Lists</h1>
-                <div>
+                <div className="input-container">
                     <input
                         type="text"
                         value={inputValue}
+                        className="input-field"
                         placeholder="Enter the item..."
                         onChange={handleChange}
                     />
@@ -87,82 +119,88 @@ const TodoLists = () => {
                     <input
                         type="button"
                         value="Submit"
+                        className="submit-button"
                         onClick={handleSubmit}
                     />
                 </div>
                 <div>
-                    {lists.map((list) => {
-                        return (
-                            <ul key={list.id} className="list-container">
-                                <input
-                                    type="checkbox"
-                                    onChange={() => handleCheck(list.id)}
-                                />
+                    <div>
+                        {lists.map((list) => {
+                            return (
+                                <ul key={list.id} className="list-container">
+                                    <input
+                                        type="checkbox"
+                                        className="check-box"
+                                        onChange={() => handleCheck(list.id)}
+                                    />
 
-                                <div>
+                                    <div>
+                                        {editItemId === list.id ? (
+                                            <input
+                                                className="edit-field"
+                                                type="text"
+                                                value={list.item}
+                                                onChange={(e) => {
+                                                    handleInputValue(e, list.id)
+                                                }}
+                                            />
+                                        ) : (
+                                            list.item
+                                        )}
+                                    </div>
+                                    <input
+                                        type="button"
+                                        value="Delete"
+                                        className="delete-button"
+                                        onClick={() => handleDelete(list.id)}
+                                    />
                                     {editItemId === list.id ? (
                                         <input
-                                            type="text"
-                                            value={list.item}
-                                            onChange={(e) => {
-                                                handleInputValue(e, list.id)
-                                            }}
+                                            className="update-button"
+                                            type="button"
+                                            value="Update"
+                                            onClick={() =>
+                                                handleUpdate(list.id, list.item)
+                                            }
                                         />
                                     ) : (
-                                        <>
-                                            {list.completed === true ? (
-                                                <div
-                                                    style={{
-                                                        textDecoration:
-                                                            'line-Through'
-                                                    }}
-                                                >
-                                                    {list.item}
-                                                </div>
-                                            ) : (
-                                                list.item
-                                            )}
-                                        </>
+                                        <input
+                                            className="update-button"
+                                            type="button"
+                                            value="Edit"
+                                            onClick={() => handleEdit(list.id)}
+                                        />
                                     )}
-                                </div>
-                                <input
-                                    type="button"
-                                    value="Delete"
-                                    onClick={() => handleDelete(list.id)}
-                                />
-                                {editItemId === list.id ? (
-                                    <input
-                                        type="button"
-                                        value="Update"
-                                        onClick={() =>
-                                            handleUpdate(list.id, list.item)
-                                        }
-                                    />
-                                ) : (
-                                    <input
-                                        type="button"
-                                        value="Edit"
-                                        onClick={() => handleEdit(list.id)}
-                                    />
-                                )}
-                            </ul>
-                        )
-                    })}
+                                </ul>
+                            )
+                        })}
+                    </div>
                 </div>
                 <div>
                     <h3>
-                        Completed Items <span>{deletedItems.length}</span>
+                        Completed Items <span>{completedItems.length}</span>
                     </h3>
                     <div>
                         {' '}
-                        {deletedItems.map((item) => {
+                        {completedItems.map((item) => {
                             return (
                                 <ul
                                     key={item.id}
                                     className="deletedItem-container"
                                 >
-                                    <input type="checkbox" name="" id="" />
-                                    <div>{item.item}</div>
+                                    <input
+                                        type="checkbox"
+                                        className="check-box"
+                                        onChange={() => handleUncheck(item.id)}
+                                        defaultChecked={item.completed}
+                                    />
+                                    <div
+                                        style={{
+                                            textDecoration: 'line-through'
+                                        }}
+                                    >
+                                        {item.item}
+                                    </div>
                                 </ul>
                             )
                         })}
