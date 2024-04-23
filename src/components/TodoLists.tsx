@@ -40,15 +40,19 @@ const TodoLists = () => {
         )
         setCompletedItems(updateCompltedValue)
 
-        if (editItemId === id) {
-            setEditItemId(null)
-        }
+        // if (editItemId === id) {
+        //     setEditItemId(null)
+        // }
+        
     }
 
     const handleEdit = (id: string) => {
         setEditItemId(id)
     }
     const handleUpdate = (id: string, newValue: string) => {
+        if (newValue.trim() === '') {
+            return alert('Enter the item')
+        }
         const updateList = lists.map((list) =>
             list.id === id ? { ...list, item: newValue } : list
         )
